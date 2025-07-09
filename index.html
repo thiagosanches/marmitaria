@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marmitaria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #f5f5f5;
+        }
+
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-info {
+            flex-grow: 1;
+        }
+
+        .order-time {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .debt-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .debt-amount {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.5em;
+            margin-top: 10px;
+        }
+
+        /* Add menu section styles */
+        .menu-section {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .menu-form {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .menu-list {
+            margin-top: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .size-prices {
+            display: flex;
+            gap: 15px;
+        }
+
+        .complete-btn {
+            background-color: lightblue !important;
+        }
+
+        .remove-btn {
+            background-color: lightpink !important;
+        }
+
+        .completed .order-info {
+            position: relative;
+            text-decoration: line-through;
+            color: #888;
+        }
+
+        .completed .order-info::after {
+            color: #4CAF50;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .reset-note {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 0.8rem;
+            font-style: italic;
+        }
+    </style>
+    <link rel="manifest"
+        href="data:application/json;base64,eyJuYW1lIjoiRm9vZCBPcmRlcnMiLCJzaG9ydF9uYW1lIjoiT3JkZXJzIiwic3RhcnRfdXJsIjoiaW5kZXguaHRtbCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCIgdGhlbWVfY29sb3IiOiIjMDAwMGZmIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxQTkdQTkdQTkciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ==">
+</head>
+
+<body>
+    <h1>Marmitaria</h1>
+
+    <div class="debt-section">
+        💰 <span id="totalDebt" class="debt-amount">0.00</span>
+    </div>
+
+    <div class="debt-section">
+        <button onclick="resetDatabase()" style="background: #cccccc;">
+            Apagar todos os dados
+        </button>
+        <div class="reset-note">
+            Utilize essa opção apenas no início do seu dia ou quando precisar cadastrar novamente os pratos. Lembre-se de que isso irá apagar todos os registros existentes.
+        </div>
+    </div>
+
+    <div class="menu-section">
+        <h2>Menu do dia</h2>
+        <div class="menu-form">
+            <input type="text" id="menuItem" placeholder="PRATO">
+            <input type="number" id="smallPrice" placeholder="PEQUENA" step="0.01" min="18">
+            <input type="number" id="largePrice" placeholder="GRANDE" step="0.01" min="20">
+        </div>
+        <button onclick="addMenuItem()">Adicionar</button>
+        <div class="menu-list" id="menuList"></div>
+    </div>
+
+    <div class="form-container">
+        <div class="input-group">
+            <input type="text" id="name" placeholder="NOME DO CLIENTE">
+            <input type="datetime-local" id="time">
+        </div>
+        <select id="food">
+            <option value="">Selecione o prato</option>
+        </select>
+        <select id="size">
+            <option value="">Selecione o tamanho</option>
+            <option value="small">PEQUENA</option>
+            <option value="large">GRANDE</option>
+        </select>
+        <button onclick="saveOrder()">Adicionar</button>
+    </div>
+
+    <ul id="list"></ul>
+
+    <script>
+        let db;
+        let request = indexedDB.open("FoodSystemDB", 11);
+
+        request.onupgradeneeded = function (event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains("orders")) {
+                db.createObjectStore("orders", {
+                    keyPath: "id",
+                    autoIncrement: true
+                });
+            }
+
+            // Create menu store if needed
+            if (!db.objectStoreNames.contains("menu")) {
+                const menuStore = db.createObjectStore("menu", {
+                    keyPath: "id",
+                    autoIncrement: true
+                });
+                menuStore.createIndex("foodName", "foodName", { unique: true });
+            }
+        };
+
+        request.onsuccess = function (event) {
+            db = event.target.result;
+            loadOrders();
+            loadMenu();
+            updateFoodDropdown();
+            updateTotalMoney();
+        };
+
+        request.onerror = function (event) {
+            console.error("Error opening IndexedDB", event);
+        };
+
+        function saveOrder() {
+            const foodElement = document.getElementById("food");
+            const food = foodElement.options[foodElement.selectedIndex].value;
+            const name = document.getElementById("name").value;
+            const time = document.getElementById("time").value;
+            const size = document.getElementById("size").value;
+
+            if (!name || !food || !time || !size) {
+                alert("Preencha todos os campos!");
+                return;
+            }
+
+            const transaction = db.transaction(["orders"], "readwrite");
+            const store = transaction.objectStore("orders");
+
+            const selectedFoodOption = foodElement.options[foodElement.selectedIndex];
+            let price = parseFloat(selectedFoodOption.dataset.smallPrice);
+            if (size === 'large')
+                price = parseFloat(selectedFoodOption.dataset.largePrice);
+
+            store.add({
+                name: name,
+                food: food,
+                price: price,
+                time: new Date(time).toISOString(),
+                taken: false
+            });
+
+            transaction.oncomplete = function () {
+                document.getElementById("name").value = "";
+                document.getElementById("food").value = "";
+                document.getElementById("time").value = "";
+                loadOrders();
+                updateTotalMoney();
+            };
+        }
+
+        function loadOrders() {
+            const list = document.getElementById("list");
+            list.innerHTML = "";
+
+            const transaction = db.transaction(["orders"], "readonly");
+            const store = transaction.objectStore("orders");
+            const request = store.openCursor();
+
+            request.onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const order = cursor.value;
+                    const li = document.createElement("li");
+                    li.className = order.completed ? 'completed' : null
+                    li.innerHTML = `
+                        <div class="order-info completed">
+                            <strong>${order.name}</strong> - ${order.food} - ${formatBRL(order.price)}
+                            <div class="order-time">
+                                RETIRADA: ${new Date(order.time).toLocaleTimeString()}
+                            </div>
+                            
+                            <button onclick="toggleComplete(${cursor.key})" class="complete-btn">
+                                ${order.completed ? '↩️' : '✅'}
+                            </button>
+
+                            <button onclick="removeOrder(${cursor.key})" class="remove-btn">
+                                🗑️
+                            </button>
+                        </div>
+                    `;
+
+                    list.appendChild(li);
+                    cursor.continue();
+                }
+            };
+        }
+
+        function updateFoodDropdown() {
+            const transaction = db.transaction(["menu"], "readonly");
+            const store = transaction.objectStore("menu");
+            const request = store.getAll();
+
+            request.onsuccess = function () {
+                const foodSelect = document.getElementById('food');
+                foodSelect.innerHTML = '<option value="">Selecione o prato</option>';
+
+                request.result.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.foodName;
+                    option.textContent = `${item.foodName}`;
+                    option.dataset.smallPrice = item.smallPrice;
+                    option.dataset.largePrice = item.largePrice;
+                    foodSelect.appendChild(option);
+                });
+            };
+        }
+
+        function updateTotalMoney() {
+            const transaction = db.transaction(["orders"], "readonly");
+            const store = transaction.objectStore("orders");
+            const request = store.getAll();
+            request.onsuccess = function () {
+                let total = 0;
+                request.result.forEach(item => {
+                    total += item.price;
+                });
+                document.getElementById('totalDebt').innerHTML = formatBRL(total)
+            };
+        }
+
+        // Add menu functions
+        function addMenuItem() {
+            const foodName = document.getElementById('menuItem').value;
+            const smallPrice = parseFloat(document.getElementById('smallPrice').value);
+            const largePrice = parseFloat(document.getElementById('largePrice').value);
+
+            if (!foodName || isNaN(smallPrice) || isNaN(largePrice)) {
+                alert("Preencha todos os campos obrigatórios!");
+                return;
+            }
+
+            const transaction = db.transaction(["menu"], "readwrite");
+            const store = transaction.objectStore("menu");
+
+            store.add({
+                foodName: foodName,
+                smallPrice: smallPrice,
+                largePrice: largePrice
+            });
+
+            transaction.oncomplete = function () {
+                document.getElementById('menuItem').value = '';
+                document.getElementById('smallPrice').value = '18,00';
+                document.getElementById('largePrice').value = '20,00';
+                loadMenu();
+                updateFoodDropdown();
+            };
+        }
+
+        function loadMenu() {
+            const transaction = db.transaction(["menu"], "readonly");
+            const store = transaction.objectStore("menu");
+            const request = store.getAll();
+
+            request.onsuccess = function () {
+                const menuList = document.getElementById('menuList');
+                request.result.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'menu-item';
+                    div.innerHTML = `
+                        <div>${item.foodName}</div>
+                        <div class="size-prices">
+                            <span>P.: ${formatBRL(item.smallPrice)}</span>
+                            <span>G.: ${formatBRL(item.largePrice)}</span>
+                        </div>
+                    `;
+                    menuList.appendChild(div);
+                });
+            };
+        }
+
+        function formatBRL(value) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(value);
+        }
+
+        function removeOrder(id) {
+            if (confirm('Você tem certeza que deseja remover esta entrada?')) {
+                const transaction = db.transaction(["orders"], "readwrite");
+                const store = transaction.objectStore("orders");
+                store.delete(id);
+                loadOrders();
+                updateTotalMoney();
+            }
+        }
+
+        function toggleComplete(id) {
+            const transaction = db.transaction(["orders"], "readwrite");
+            const store = transaction.objectStore("orders");
+            const request = store.get(id);
+
+            request.onsuccess = function () {
+                const order = request.result;
+                order.completed = !order.completed;
+                store.put(order);
+                loadOrders();
+                updateTotalMoney();
+            };
+        }
+
+        function deleteAllTables() {
+            return new Promise((resolve, reject) => {
+                // Close any existing connection
+                if (db) {
+                    db.close();
+                }
+
+                // Open the database to get current version
+                const versionReq = indexedDB.open("FoodSystemDB");
+
+                versionReq.onsuccess = function (event) {
+                    const db = event.target.result;
+                    const oldVersion = db.version;
+                    db.close();
+
+                    // Reopen with incremented version to trigger upgrade
+                    const deleteReq = indexedDB.open("FoodSystemDB", oldVersion + 1);
+
+                    deleteReq.onupgradeneeded = function (event) {
+                        const db = event.target.result;
+
+                        // Delete all existing object stores
+                        Array.from(db.objectStoreNames).forEach(storeName => {
+                            db.deleteObjectStore(storeName);
+                        });
+                    };
+
+                    deleteReq.onsuccess = function () {
+                        resolve();
+                        deleteReq.result.close();
+                    };
+
+                    deleteReq.onerror = function (error) {
+                        reject(error);
+                    };
+                };
+
+                versionReq.onerror = function (error) {
+                    reject(error);
+                };
+            });
+        }
+
+        async function resetDatabase() {
+            if (confirm("CUIDADO: Isso vai destruir todos os dados de hoje! Continuar?")) {
+                await deleteAllTables();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+
+</html>
