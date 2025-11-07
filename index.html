@@ -156,6 +156,60 @@
             margin-top: 0.8rem;
             font-style: italic;
         }
+
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-form {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container,
+            .debt-section,
+            .menu-section {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 20px;
+            }
+
+            h2 {
+                font-size: 1.2em;
+            }
+
+            li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .order-info {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .size-prices {
+                margin-top: 5px;
+            }
+        }
     </style>
     <link rel="manifest"
         href="data:application/json;base64,eyJuYW1lIjoiRm9vZCBPcmRlcnMiLCJzaG9ydF9uYW1lIjoiT3JkZXJzIiwic3RhcnRfdXJsIjoiaW5kZXguaHRtbCIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCIgdGhlbWVfY29sb3IiOiIjMDAwMGZmIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxQTkdQTkdQTkciLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dfQ==">
