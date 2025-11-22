@@ -257,9 +257,14 @@
     </div>
 
     <div class="form-container">
+        <input type="text" id="name" placeholder="NOME DO CLIENTE">
         <div class="input-group">
-            <input type="text" id="name" placeholder="NOME DO CLIENTE">
-            <input type="datetime-local" id="time">
+            <select id="hour">
+                <option value="">HORA</option>
+            </select>
+            <select id="minute">
+                <option value="">MINUTO</option>
+            </select>
         </div>
         <select id="food">
             <option value="">Selecione o prato</option>
@@ -303,23 +308,62 @@
             loadMenu();
             updateFoodDropdown();
             updateTotalMoney();
+            populateTimeSelectors();
         };
 
         request.onerror = function (event) {
             console.error("Error opening IndexedDB", event);
         };
 
+        function populateTimeSelectors() {
+            const hourSelect = document.getElementById('hour');
+            const minuteSelect = document.getElementById('minute');
+            
+            // Populate hours (0-23)
+            for (let i = 0; i < 24; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString().padStart(2, '0');
+                option.textContent = i.toString().padStart(2, '0');
+                hourSelect.appendChild(option);
+            }
+            
+            // Populate minutes (0, 15, 30, 45)
+            [0, 15, 30, 45].forEach(min => {
+                const option = document.createElement('option');
+                option.value = min.toString().padStart(2, '0');
+                option.textContent = min.toString().padStart(2, '0');
+                minuteSelect.appendChild(option);
+            });
+            
+            // Set current time as default
+            const now = new Date();
+            const currentHour = now.getHours().toString().padStart(2, '0');
+            const currentMinute = Math.floor(now.getMinutes() / 15) * 15;
+            const roundedMinute = currentMinute.toString().padStart(2, '0');
+            
+            hourSelect.value = currentHour;
+            minuteSelect.value = roundedMinute;
+        }
+
         function saveOrder() {
             const foodElement = document.getElementById("food");
             const food = foodElement.options[foodElement.selectedIndex].value;
             const name = document.getElementById("name").value;
-            const time = document.getElementById("time").value;
+            const hour = document.getElementById("hour").value;
+            const minute = document.getElementById("minute").value;
             const size = document.getElementById("size").value;
 
-            if (!name || !food || !time || !size) {
+            if (!name || !food || !hour || !minute || !size) {
                 alert("Preencha todos os campos!");
                 return;
             }
+            
+            // Create time from hour and minute
+            const now = new Date();
+            now.setHours(parseInt(hour));
+            now.setMinutes(parseInt(minute));
+            now.setSeconds(0);
+            const time = now.toISOString();
 
             const transaction = db.transaction(["orders"], "readwrite");
             const store = transaction.objectStore("orders");
@@ -340,7 +384,8 @@
             transaction.oncomplete = function () {
                 document.getElementById("name").value = "";
                 document.getElementById("food").value = "";
-                document.getElementById("time").value = "";
+                document.getElementById("size").value = "";
+                populateTimeSelectors(); // Reset to current time
                 loadOrders();
                 updateTotalMoney();
             };
