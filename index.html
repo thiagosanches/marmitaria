@@ -36,6 +36,18 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            resize: vertical;
+            min-height: 60px;
+            box-sizing: border-box;
         }
 
         button {
@@ -243,8 +255,8 @@
         </div>
         <div class="menu-form">
             <input type="text" id="menuItem" placeholder="PRATO">
-            <input type="number" id="smallPrice" placeholder="PEQUENA" step="0.01" min="18">
-            <input type="number" id="largePrice" placeholder="GRANDE" step="0.01" min="20">
+            <input type="number" id="smallPrice" placeholder="PEQUENA" step="0.01" min="18" value="20.00">
+            <input type="number" id="largePrice" placeholder="GRANDE" step="0.01" min="20" value="22.00">
         </div>
         <button onclick="addMenuItem()">Adicionar</button>
         <div class="menu-list" id="menuList"></div>
@@ -252,7 +264,7 @@
 
     <div class="form-container">
         <h2>Pedidos</h2>
-        <input type="text" id="name" placeholder="NOME DO CLIENTE">
+        <input type="text" id="name" placeholder="NOME DO CLIENTE" style="width: 100%;">
         <div class="reset-note" style="margin-bottom: 10px;">
             Escolha o horário em que o cliente irá retirar a marmita.
         </div>
@@ -264,15 +276,16 @@
                 <option value="">MINUTO</option>
             </select>
         </div>
-        <select id="food">
+        <select id="food" style="margin-top: 10px; width: 100%;">
             <option value="">Selecione o prato</option>
         </select>
-        <select id="size">
+        <select id="size" style="margin-top: 10px; width: 100%;">
             <option value="">Selecione o tamanho</option>
             <option value="small">PEQUENA</option>
             <option value="large">GRANDE</option>
         </select>
-        <button onclick="saveOrder()">Adicionar</button>
+        <textarea id="notes" placeholder="OBSERVAÇÕES (ex: sem feijão, sem arroz)" style="margin-top: 10px; width: 100%;"></textarea>
+        <button onclick="saveOrder()" style="margin-top: 10px; width: 100%;">Adicionar</button>
     </div>
 
     <ul id="list"></ul>
@@ -359,9 +372,10 @@
             const hour = document.getElementById("hour").value;
             const minute = document.getElementById("minute").value;
             const size = document.getElementById("size").value;
+            const notes = document.getElementById("notes").value;
 
             if (!name || !food || !hour || !minute || !size) {
-                alert("Preencha todos os campos!");
+                alert("Preencha todos os campos obrigatórios!");
                 return;
             }
             
@@ -385,6 +399,7 @@
                 food: food,
                 price: price,
                 time: new Date(time).toISOString(),
+                notes: notes || '',
                 taken: false
             });
 
@@ -392,6 +407,7 @@
                 document.getElementById("name").value = "";
                 document.getElementById("food").value = "";
                 document.getElementById("size").value = "";
+                document.getElementById("notes").value = "";
                 populateTimeSelectors(); // Reset to current time
                 loadOrders();
                 updateTotalMoney();
@@ -415,6 +431,7 @@
                     li.innerHTML = `
                         <div class="order-info completed">
                             <strong>${order.name}</strong> - ${order.food} - ${formatBRL(order.price)}
+                            ${order.notes ? `<div style="color: #ff6b6b; font-style: italic; margin-top: 5px;">⚠️ ${order.notes}</div>` : ''}
                             <div class="order-time">
                                 RETIRADA: ${new Date(order.time).toLocaleTimeString()}
                             </div>
@@ -490,8 +507,8 @@
 
             transaction.oncomplete = function () {
                 document.getElementById('menuItem').value = '';
-                document.getElementById('smallPrice').value = '18,00';
-                document.getElementById('largePrice').value = '20,00';
+                document.getElementById('smallPrice').value = '20.00';
+                document.getElementById('largePrice').value = '22.00';
                 loadMenu();
                 updateFoodDropdown();
             };
@@ -552,53 +569,30 @@
             };
         }
 
-        function deleteAllTables() {
-            return new Promise((resolve, reject) => {
-                // Close any existing connection
+        async function resetDatabase() {
+            if (confirm("CUIDADO: Isso vai destruir todos os dados de hoje! Continuar?")) {
+                // Close the current connection
                 if (db) {
                     db.close();
                 }
 
-                // Open the database to get current version
-                const versionReq = indexedDB.open("FoodSystemDB");
+                // Delete the entire database
+                const deleteRequest = indexedDB.deleteDatabase("FoodSystemDB");
 
-                versionReq.onsuccess = function (event) {
-                    const db = event.target.result;
-                    const oldVersion = db.version;
-                    db.close();
-
-                    // Reopen with incremented version to trigger upgrade
-                    const deleteReq = indexedDB.open("FoodSystemDB", oldVersion + 1);
-
-                    deleteReq.onupgradeneeded = function (event) {
-                        const db = event.target.result;
-
-                        // Delete all existing object stores
-                        Array.from(db.objectStoreNames).forEach(storeName => {
-                            db.deleteObjectStore(storeName);
-                        });
-                    };
-
-                    deleteReq.onsuccess = function () {
-                        resolve();
-                        deleteReq.result.close();
-                    };
-
-                    deleteReq.onerror = function (error) {
-                        reject(error);
-                    };
+                deleteRequest.onsuccess = function () {
+                    console.log("Database deleted successfully");
+                    location.reload();
                 };
 
-                versionReq.onerror = function (error) {
-                    reject(error);
+                deleteRequest.onerror = function (event) {
+                    console.error("Error deleting database:", event);
+                    alert("Erro ao apagar o banco de dados. Tente novamente.");
                 };
-            });
-        }
 
-        async function resetDatabase() {
-            if (confirm("CUIDADO: Isso vai destruir todos os dados de hoje! Continuar?")) {
-                await deleteAllTables();
-                location.reload();
+                deleteRequest.onblocked = function () {
+                    console.warn("Database deletion blocked. Close all tabs using this app.");
+                    alert("Feche todas as abas usando este aplicativo e tente novamente.");
+                };
             }
         }
     </script>
