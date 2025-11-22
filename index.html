@@ -236,17 +236,11 @@
         💰 <span id="totalDebt" class="debt-amount">0.00</span>
     </div>
 
-    <div class="debt-section">
-        <button onclick="resetDatabase()" style="background: #cccccc;">
-            Apagar todos os dados
-        </button>
-        <div class="reset-note">
-            Utilize essa opção apenas no início do seu dia ou quando precisar cadastrar novamente os pratos. Lembre-se de que isso irá apagar todos os registros existentes.
-        </div>
-    </div>
-
     <div class="menu-section">
         <h2>Menu do dia</h2>
+        <div class="reset-note">
+            Configure os pratos do dia e seus preços (marmita pequena e grande) antes de iniciar o dia!
+        </div>
         <div class="menu-form">
             <input type="text" id="menuItem" placeholder="PRATO">
             <input type="number" id="smallPrice" placeholder="PEQUENA" step="0.01" min="18">
@@ -257,7 +251,11 @@
     </div>
 
     <div class="form-container">
+        <h2>Pedidos</h2>
         <input type="text" id="name" placeholder="NOME DO CLIENTE">
+        <div class="reset-note" style="margin-bottom: 10px;">
+            Escolha o horário em que o cliente irá retirar a marmita.
+        </div>
         <div class="input-group">
             <select id="hour">
                 <option value="">HORA</option>
@@ -278,6 +276,15 @@
     </div>
 
     <ul id="list"></ul>
+
+    <div class="debt-section">
+        <button onclick="resetDatabase()" style="background: #cccccc;">
+            Apagar todos os dados
+        </button>
+        <div class="reset-note">
+            Utilize essa opção apenas no início do seu dia ou quando precisar cadastrar novamente os pratos. Lembre-se de que isso irá apagar todos os registros existentes.
+        </div>
+    </div>
 
     <script>
         let db;
